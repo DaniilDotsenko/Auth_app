@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  database:
+    container_name: database
+    image: postgres:15.3
+    environment: 
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=localhost
+    volumes:
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env.example
+    restart: always
+    networks:
+      - default
+
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - database
+    ports:
+      - 3000:3000
+    environment:
+      - DB_HOST=database
+    command: npm start
+    volumes:
+      - .:/app
+      - /app/node_modules
+    env_file:
+      - .env.example
+    networks:
+      - default
+
+volumes:
+  db-data:
+
+networks:
+  default:
+   
